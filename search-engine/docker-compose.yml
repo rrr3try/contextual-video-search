@@ -1,0 +1,63 @@
+version: '3.3'
+
+services:
+  odfe-node:
+    image: elasticsearch:7.10.1
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000m"
+        max-file: "10"
+    container_name: odfe-node
+    environment:
+      - discovery.type=single-node
+      - http.max_content_length=1000mb
+      - indices.memory.index_buffer_size=30%
+      - thread_pool.write.queue_size=500  # Increase write queue size
+      - indices.fielddata.cache.size=20%  # Adjust fielddata cache size
+      - ES_JAVA_OPTS=-Xms4g -Xmx4g
+    volumes:
+      - ./elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    networks:
+      - mynetwork
+
+  postgres_db:
+    image: postgres:15.1-alpine
+    container_name: media-content
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=media-content-db
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+
+  search-engine:
+    build: .
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - odfe-node
+      - postgres_db
+    volumes:
+      - type: bind
+        source: ./src/main/resources
+        target: /opt/app/resources
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  odfe-data:
+  postgres_db:
+
