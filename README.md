@@ -12,6 +12,10 @@ POST http://192.144.12.231:8080/index
   "tags": ""
 }
 
+
+Удаление дублей по хешу видеоконтента
+https://github.com/badma2021/yappi
+
 # Сервисы
 ### Transcription Service
 http://192.144.12.231:8001/docs#/
