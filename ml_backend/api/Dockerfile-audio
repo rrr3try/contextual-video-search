@@ -1,0 +1,10 @@
+FROM python:3.10-slim
+
+RUN mkdir /app
+WORKDIR /app
+
+RUN apt update && apt install -y ffmpeg pkg-config libhdf5-dev build-essential
+
+COPY ./ /app/
+RUN pip install --no-input --no-cache-dir -r requirements-audio-classification.txt
+#CMD ["python", "audio-classification.py"]

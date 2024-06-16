@@ -1,0 +1,67 @@
+version: '3.7'
+
+services:
+  transcription:
+    build:
+      context: ./api
+      dockerfile: Dockerfile-transcription
+    volumes:
+      - ./api:/app
+    ports:
+      - "8001:8000"
+    env_file:
+      - .env
+    command:
+      ["uvicorn", "transcription:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  ocr:
+    build:
+      context: ./api
+      dockerfile: Dockerfile-ocr
+    volumes:
+      - ./api:/app
+    ports:
+      - "8002:8000"
+    command:
+      ["uvicorn", "ocr:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  embeddings:
+    build:
+      context: ./api
+      dockerfile: Dockerfile-embeddings
+    volumes:
+      - ./api:/app
+    ports:
+      - "8003:8000"
+    command:
+      [ "uvicorn", "embeddings:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+
+
+  audio-classification:
+    build:
+      context: ./api
+      dockerfile: Dockerfile-audio
+    volumes:
+      - ./api:/app
+    ports:
+      - "8004:8000"
+    command:
+      [ "uvicorn", "audio-classification:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+
+
+#  worker:
+#    build:
+#      context: ./api
+#      dockerfile: Dockerfile-worker
+#    command: "rq worker --url redis://redis:6379"
+#    volumes:
+#      - ./api:/app
+
+#  redis:
+#    image: redis:latest
+#    healthcheck:
+#      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+#      interval: 1s
+#      timeout: 3s
+#      retries: 5
+#    command: ["redis-server"]

@@ -1,0 +1,4 @@
+paddlepaddle
+paddleocr
+fastapi==0.110.3
+uvicorn
