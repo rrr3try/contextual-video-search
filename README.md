@@ -1,7 +1,6 @@
 Набор API-сервисов для системы поиска по видео
 
-# Сервисы
-front-end
+# front-end
 http://192.144.12.231:8080
 
 
@@ -9,7 +8,7 @@ http://192.144.12.231:8080
 POST http://192.144.12.231:8080/search/combine
 Content-Type: application/json
 
-{
+```{
   "query": "Как же мне нравится эта песня",
   "coefficientOfCoincidenceDescriptionUser": 1,
   "minimumPrefixLengthDescriptionUser": 1,
@@ -35,18 +34,19 @@ Content-Type: application/json
   "boostEmbeddingVisual": 10.0,
   "boostEmbeddingUserDescription": 4.0
 }
+```
 
 
 
 ## Index API
 POST http://192.144.12.231:8080/index
-{
+```{
   "url": "",
   "title": "",
   "description": "",
   "tags": ""
 }
-
+```
 
 Удаление дублей по хешу видеоконтента
 https://github.com/badma2021/yappi
