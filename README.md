@@ -1,9 +1,44 @@
 Набор API-сервисов для системы поиска по видео
 
 # Сервисы
+front-end
+http://192.144.12.231:8080
 
-GET http://192.144.12.231:8080/search/text?query=
 
+## Search API
+POST http://192.144.12.231:8080/search/combine
+Content-Type: application/json
+
+{
+  "query": "Как же мне нравится эта песня",
+  "coefficientOfCoincidenceDescriptionUser": 1,
+  "minimumPrefixLengthDescriptionUser": 1,
+  "maximumNumberOfMatchOptionsDescriptionUser": 50,
+  
+  "coefficientOfCoincidenceAudio": 0,
+  "minimumPrefixLengthAudio": 2,
+  "maximumNumberOfMatchOptionsAudio": 50,
+  
+  "coefficientOfCoincidenceVisual": 0,
+  "minimumPrefixLengthVisual": 2,
+  "maximumNumberOfMatchOptionsVisual": 50,
+
+  "coefficientOfCoincidenceTag": 1,
+  "minimumPrefixLengthTag": 2,
+  "maximumNumberOfMatchOptionsTag": 50,
+
+  "boostDescriptionUser": 1.0,
+  "boostTranscriptionAudio": 0.0,
+  "boostDescriptionVisual": 1.0,
+  "boostTags": 1.0,
+  "boostEmbeddingAudio": 2.0,
+  "boostEmbeddingVisual": 10.0,
+  "boostEmbeddingUserDescription": 4.0
+}
+
+
+
+## Index API
 POST http://192.144.12.231:8080/index
 {
   "url": "",
