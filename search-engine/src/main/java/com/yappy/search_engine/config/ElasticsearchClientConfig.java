@@ -14,7 +14,7 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 @Configuration
 @EnableElasticsearchRepositories(basePackages
         = "com.yappy.search_engine.repository")
-@ComponentScan(basePackages = { "com.yappy.search_engine" })
+@ComponentScan(basePackages = {"com.yappy.search_engine"})
 public class ElasticsearchClientConfig extends
         AbstractElasticsearchConfiguration {
 

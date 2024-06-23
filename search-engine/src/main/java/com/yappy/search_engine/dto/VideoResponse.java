@@ -1,80 +1,46 @@
-package com.yappy.search_engine.model;
+package com.yappy.search_engine.dto;
 
-import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.Arrays;
 
-@Entity
-@Table(name = "videos", schema = "video_data")
-public class MediaContent {
-
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "uuid")
-    private UUID uuid;
-
-    @Column(name = "url")
+public class VideoResponse {
+    private String uuid;
     private String url;
-
-    @Column(name = "title")
     private String title;
-
-    @Column(name = "description_user")
     private String descriptionUser;
-
-    @Column(name = "transcription_audio")
     private String transcriptionAudio;
-
-    @Column(name = "language_audio")
     private String languageAudio;
-
-    @Column(name = "description_visual")
     private String descriptionVisual;
-
-    @Column(name = "tags")
     private String tags;
-
-    @Column(name = "created", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime created;
-
-    @Column(name = "popularity")
-    private Integer popularity;
-
-    @Column(name = "hash")
+    private String created;
+    private String popularity;
     private String hash;
-
-    @Column(name = "embedding_audio")
     private String embeddingAudio;
-
-    @Column(name = "embedding_visual")
     private String embeddingVisual;
-
-    @Column(name = "embedding_user_description")
     private String embeddingUserDescription;
 
-    @Column(name = "indexing_time")
-    private Long indexingTime;
-
-    public MediaContent() {
+    public VideoResponse() {
     }
 
-    public MediaContent(UUID uuid, String url, String title, String description, String tags, LocalDateTime created) {
+    public VideoResponse(String uuid, String url, String title, String descriptionUser, String transcriptionAudio,
+                         String languageAudio, String descriptionVisual, String tags, String created, String popularity,
+                         String hash, double[] embeddingAudio, double[] embeddingVisual, double[] embeddingUserDescription) {
         this.uuid = uuid;
         this.url = url;
         this.title = title;
-        this.descriptionUser = description;
+        this.descriptionUser = descriptionUser;
+        this.transcriptionAudio = transcriptionAudio;
+        this.languageAudio = languageAudio;
+        this.descriptionVisual = descriptionVisual;
         this.tags = tags;
         this.created = created;
+        this.popularity = popularity;
+        this.hash = hash;
+        this.embeddingAudio = Arrays.toString(embeddingAudio);
+        this.embeddingVisual = Arrays.toString(embeddingVisual);
+        this.embeddingUserDescription = Arrays.toString(embeddingUserDescription);
     }
 
-    public MediaContent(Long id, UUID uuid, String url, String title, String descriptionUser, String transcriptionAudio,
-                        String languageAudio, String descriptionVisual, String tags, LocalDateTime created,
-                        Integer popularity, String hash, String embeddingAudio, String embeddingVisual,
-                        String embeddingUserDescription, Long indexingTime) {
-        this.id = id;
+    public VideoResponse(String uuid, String url, String title, String descriptionUser, String transcriptionAudio, String languageAudio, String descriptionVisual, String tags, String created, String popularity, String hash, String embeddingAudio, String embeddingVisual, String embeddingUserDescription) {
         this.uuid = uuid;
         this.url = url;
         this.title = title;
@@ -89,22 +55,13 @@ public class MediaContent {
         this.embeddingAudio = embeddingAudio;
         this.embeddingVisual = embeddingVisual;
         this.embeddingUserDescription = embeddingUserDescription;
-        this.indexingTime = indexingTime;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public UUID getUuid() {
+    public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(UUID uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -164,19 +121,19 @@ public class MediaContent {
         this.tags = tags;
     }
 
-    public LocalDateTime getCreated() {
+    public String getCreated() {
         return created;
     }
 
-    public void setCreated(LocalDateTime created) {
+    public void setCreated(String created) {
         this.created = created;
     }
 
-    public Integer getPopularity() {
+    public String getPopularity() {
         return popularity;
     }
 
-    public void setPopularity(Integer popularity) {
+    public void setPopularity(String popularity) {
         this.popularity = popularity;
     }
 
@@ -192,39 +149,42 @@ public class MediaContent {
         return embeddingAudio;
     }
 
-    public void setEmbeddingAudio(String embeddingAudio) {
-        this.embeddingAudio = embeddingAudio;
+    public void setEmbeddingAudio(double[] embeddingAudio) {
+        this.embeddingAudio = Arrays.toString(embeddingAudio);
     }
 
     public String getEmbeddingVisual() {
         return embeddingVisual;
     }
 
-    public void setEmbeddingVisual(String embeddingVisual) {
-        this.embeddingVisual = embeddingVisual;
+    public void setEmbeddingVisual(double[] embeddingVisual) {
+        this.embeddingVisual = Arrays.toString(embeddingVisual);
     }
 
     public String getEmbeddingUserDescription() {
         return embeddingUserDescription;
     }
 
+    public void setEmbeddingUserDescription(double[] embeddingUserDescription) {
+        this.embeddingUserDescription = Arrays.toString(embeddingUserDescription);
+    }
+
+    public void setEmbeddingAudio(String embeddingAudio) {
+        this.embeddingAudio = embeddingAudio;
+    }
+
+    public void setEmbeddingVisual(String embeddingVisual) {
+        this.embeddingVisual = embeddingVisual;
+    }
+
     public void setEmbeddingUserDescription(String embeddingUserDescription) {
         this.embeddingUserDescription = embeddingUserDescription;
     }
 
-    public Long getIndexingTime() {
-        return indexingTime;
-    }
-
-    public void setIndexingTime(Long indexingTime) {
-        this.indexingTime = indexingTime;
-    }
-
     @Override
     public String toString() {
-        return "MediaContent{" +
-               "id=" + id +
-               ", uuid=" + uuid +
+        return "VideoResponse{" +
+               "uuid='" + uuid + '\'' +
                ", url='" + url + '\'' +
                ", title='" + title + '\'' +
                ", descriptionUser='" + descriptionUser + '\'' +
@@ -232,13 +192,12 @@ public class MediaContent {
                ", languageAudio='" + languageAudio + '\'' +
                ", descriptionVisual='" + descriptionVisual + '\'' +
                ", tags='" + tags + '\'' +
-               ", created=" + created +
-               ", popularity=" + popularity +
+               ", created='" + created + '\'' +
+               ", popularity='" + popularity + '\'' +
                ", hash='" + hash + '\'' +
                ", embeddingAudio='" + embeddingAudio + '\'' +
                ", embeddingVisual='" + embeddingVisual + '\'' +
                ", embeddingUserDescription='" + embeddingUserDescription + '\'' +
-               ", indexingTime='" + indexingTime + '\'' +
                '}';
     }
 }

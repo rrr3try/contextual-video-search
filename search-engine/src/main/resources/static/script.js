@@ -9,6 +9,7 @@ var isMyVideo = false;
 const host = "192.144.12.231";//localhost
 
 document.addEventListener('DOMContentLoaded', function () {
+    showLoadingSearch();
     const startTime = performance.now();
     try {
         fetch(`http://${host}:8080/recommendations`, {
@@ -24,17 +25,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 videos = data.videos;
                 updateVideo(currentIndex);
                 updateResults(data.videos);
-                showMessage(startTime, 'success', `Найдено более ${data.totalHits} видео. Популярность по частоте использования тега`);
+                showMessage(startTime, 'success', `Рекомендательная система нашла более ${data.totalHits} видео. Популярность по частоте использования тега`);
+                hideLoadingAll();
             } else {
                 clear();
+                hideLoadingAll();
                 showMessage(startTime, 'info', 'Рекомендательные видео не найдены');
             }
         }).catch(error => {
             clear();
+            hideLoadingAll();
             showMessage(startTime, 'error', error);
         });
     } catch (error) {
         clear();
+        hideLoadingAll();
         showMessage(startTime, 'error', 'Произошла ошибка при получении популярных видео');
     }
 });
@@ -45,6 +50,7 @@ function showSaveForm(id, surname, name, otchestvo, job, birthday) {
 }
 
 function saveNewVideo() {
+    showLoadingAll();
     const url = document.getElementById('url').value;
     const title = document.getElementById('title').value;
     const description = document.getElementById('description').value;
@@ -52,7 +58,7 @@ function saveNewVideo() {
 
     if (url) {
         const startTime = performance.now();
-        fetch(`http://${host}:8080/index`, {
+        fetch(`http://${host}:8080/index-my`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -79,8 +85,11 @@ function saveNewVideo() {
             updateVideo(mySavedVideosCurrentIndex);
             updateSavedVideos(data, mySavedVideosCurrentIndex);
             showMessage(startTime, 'success', 'Загрузка видео успешно завершена.');
+            hideLoadingAll();
         })
             .catch(error => {
+            hideSaveForm();
+            hideLoadingAll();
             showMessage(startTime, 'error', `Произошла ошибка при загрузке видео. ${error.message}`);
         });
         hideSaveForm();
@@ -108,6 +117,13 @@ function showFilterForm() {
 }
 function hideFilterForm() {
     document.getElementById('filterFormOverlay').style.display = 'none';
+}
+/*Информация о бд*/
+function showDbInfo() {
+    document.getElementById('infoDbOverlay').style.display = 'block';
+}
+function hideDbInfo() {
+    document.getElementById('infoDbOverlay').style.display = 'none';
 }
 
 /*Поиск*/
@@ -157,13 +173,14 @@ document.getElementById('btnSearch').addEventListener('click', function (event) 
 });
 
 function sendSearchRequest() {
-    const queryText = document.getElementById('queryText').value;
+    showLoadingSearch();
+    var queryText = document.getElementById('queryText').value;
     const suggestionsList = document.getElementById('suggestions-list');
     suggestionsList.style.display = 'none';
 
-    console.log(`Запрос: ${queryText}`);  // Логирование запроса
     const startTime = performance.now();
     try {
+        const logIn = document.getElementById('logIn').value;
         const typeSearch = document.getElementById('typeSearch').value;
         const dateFilter = document.getElementById('dateFilter').value;
         const sort = document.getElementById('sort').value;
@@ -188,7 +205,12 @@ function sendSearchRequest() {
                 break;
         }
         let date = getDate(dateFilter);
-
+        if(logIn === 'bicyclist'){
+            queryText = queryText + ' велосипедист';
+        }else if(logIn ==='historian'){
+            queryText = queryText + ' историк, средневековье';
+        }
+        console.log(`Запрос: ${queryText}`);  // Логирование запроса
         const searchRequestDto = {
             typeSearch: typeSearch,
             query: queryText,
@@ -207,7 +229,7 @@ function sendSearchRequest() {
             body: JSON.stringify(searchRequestDto)
         }).then(response => response.json())
             .then(data => {
-            if (data) {
+            if (data || data.totalHits > 0) {
                 isMyVideo = false;
                 currentIndex = 0;
                 console.log(data.videos);
@@ -224,15 +246,19 @@ function sendSearchRequest() {
                 clear();
                 showMessage(startTime, 'info', 'Видео не найдены');
             }
+            hideLoadingSearch();
         }).catch(error => {
             clear();
-            showMessage(startTime, 'error', error.message || 'Произошла ошибка при выполнении запроса');
+            hideLoadingSearch();
+            showMessage(startTime, 'error', 'Видео не найдены');
         });
     } catch (error) {
         clear();
+        hideLoadingSearch();
         showMessage(startTime, 'error', 'Произошла ошибка при отправке формы');
     }
 }
+
 function getDate(dateFilter){
     let date;
     switch (dateFilter) {
@@ -368,16 +394,33 @@ function playVideo(videoSrc, popularity, videoTitle, videoDescription, videoTags
 
 document.getElementById('info-link').addEventListener('click', function(event) {
     event.preventDefault();
-    const url = "info-video.html";
-    var encodedQuery;
-    if(isMyVideo){
-        encodedQuery = encodeURIComponent(JSON.stringify(mySavedVideos[mySavedVideosCurrentIndex]));
-    }else{
-        encodedQuery = encodeURIComponent(JSON.stringify(videos[currentIndex]));
+    const url = `http://${host}:8080/info-video`;
+    var data;
+    if (isMyVideo) {
+        data = JSON.stringify(mySavedVideos[mySavedVideosCurrentIndex]);
+    } else {
+        data = JSON.stringify(videos[currentIndex]);
     }
-    console.log("Encoded string: ", encodedQuery);
-    window.location.href = url + "?data=" + encodedQuery;
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: data
+    }).then(response => {
+        if (response.ok) {
+            return response.text();
+        } else {
+            throw new Error('Error sending data');
+        }
+    }).then(redirectUrl => {
+        console.log("Redirecting to: ", redirectUrl);
+        window.location.href = redirectUrl;
+    }).catch(error => {
+        console.error('Error:', error);
+    });
 });
+
 
 function updateVideo(index) {
     var video = [];
@@ -513,28 +556,51 @@ function showMessage(startTime, type, message) {
     }
 }
 function saveFilter() {
+    const logIn = document.getElementById("logIn");
+    const logInType = logIn.options[logIn.selectedIndex];
+    const logInInfo = document.getElementById("logInInfo");
+    logInInfo.textContent = "Авторизованы как: " + logInType.text;
+    console.log("logIn.selectedIndex " + logIn.selectedIndex);
+
     const typeSearch = document.getElementById("typeSearch");
     const selectedOptionType = typeSearch.options[typeSearch.selectedIndex];
     const typeSearchInfo = document.getElementById("typeSearchInfo");
     typeSearchInfo.textContent = "Тип поиска: " + selectedOptionType.text;
-    typeSearchInfo.classList.add("text-info");
-    console.log("typeSearch.selectedIndex"+typeSearch.selectedIndex);
+    console.log("typeSearch.selectedIndex " + typeSearch.selectedIndex);
 
     const dateFilter = document.getElementById("dateFilter");
     const selectedOptionDate = dateFilter.options[dateFilter.selectedIndex];
     const dateFilterInfo = document.getElementById("dateFilterInfo");
     dateFilterInfo.textContent = "Фильтр по дате: " + selectedOptionDate.text;
-    dateFilterInfo.classList.add("text-info");
 
     const sort = document.getElementById("sort");
     const selectedOptionSort = sort.options[sort.selectedIndex];
     const sortInfo = document.getElementById("sortInfo");
     sortInfo.textContent = "Сортировка: " + selectedOptionSort.text;
-    sortInfo.classList.add("text-info");
 
     hideFilterForm();
 }
 
+function showLoadingAll(){
+    const loadingElement = document.getElementById('loading');
+    const loadingElementSave = document.getElementById('loading-save');
+    loadingElement.style.display = 'block';
+    loadingElementSave.style.display = 'block';
+}
+function showLoadingSearch(){
+    const loadingElement = document.getElementById('loading');
+    loadingElement.style.display = 'block';
+}
+function hideLoadingAll(){
+    const loadingElement = document.getElementById('loading');
+    const loadingElementSave = document.getElementById('loading-save');
+    loadingElement.style.display = 'none';
+    loadingElementSave.style.display = 'none';
+}
+function hideLoadingSearch(){
+    const loadingElement = document.getElementById('loading');
+    loadingElement.style.display = 'none';
+}
 
 function clear() {
     currentIndex = 0;
