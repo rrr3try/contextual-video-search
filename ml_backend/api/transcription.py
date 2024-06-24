@@ -81,7 +81,7 @@ def transcribe_url(video_url: str):
     classification_result = classification_queue.get()
     if classification_result.lower() not in ["speech", "Narration, monologue", 'children shouting', "conversation", ]:
         return classification_result
-    
+
     transcription_queue.put(video_url)
     return transcription_queue.get()
 
