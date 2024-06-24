@@ -5,6 +5,8 @@ http://192.144.12.231:8080
 
 
 ## Search API
+Docs GET http://192.144.12.231:8080/swagger-ui/index.html
+
 POST http://192.144.12.231:8080/search/combine
 Content-Type: application/json
 
