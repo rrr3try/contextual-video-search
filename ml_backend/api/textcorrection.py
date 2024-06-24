@@ -11,12 +11,15 @@ import re
 
 logger = logging.getLogger(__name__)
 text_embeddings_process: Process
+text_correction_process: Process
 video_embeddings_process: Process
 device = "cuda" if torch.cuda.is_available() else "cpu"
+
 
 class TextResponse(BaseModel):
     result: str
     is_success: bool
+
 
 def load_text_correction_model():
     MODEL_NAME = 'UrukHan/t5-russian-spell'
@@ -24,8 +27,9 @@ def load_text_correction_model():
     model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
     return model, tokenizer
 
+
 def apply_text_correction(data, model, tokenizer):
-    MAX_INPUT=256
+    MAX_INPUT = 256
     print("trying process", data)
     sys.stdout.flush()
     task_prefix = "Spell correct: "
@@ -41,7 +45,6 @@ def apply_text_correction(data, model, tokenizer):
     result = tokenizer.batch_decode(predicts, skip_special_tokens=True)
     result = re.sub(r'[^a-zA-Z0-9a-яА-Я\s]', "", result[0])
     return result
-
 
 
 def worker(input_queue: Queue, output_queue: Queue):
@@ -61,10 +64,12 @@ def worker(input_queue: Queue, output_queue: Queue):
             sys.stdout.flush()
             # queue.put("Error while processing text embedding")
 
+
 app = FastAPI()
 text_queue = Queue()
 text_queue_output = Queue()
 video_queue = SimpleQueue()
+
 
 @app.on_event("startup")
 def startup():
@@ -72,11 +77,13 @@ def startup():
     text_correction_process = Process(target=worker, args=(text_queue, text_queue_output))
     text_correction_process.start()
 
+
 @app.on_event("shutdown")
 def shutdown_event():
     logger.info("Shutting down process")
     text_queue.put(None)
     text_correction_process.terminate()
+
 
 @app.post("/text_correction")
 def text_correction(text: str | None) -> TextResponse:
