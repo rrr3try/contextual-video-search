@@ -1,6 +1,6 @@
 import logging
 import types
-from multiprocessing import Process, SimpleQueue
+from multiprocessing import Process, SimpleQueue, Queue
 import sys
 import open_clip
 import torch
@@ -10,12 +10,13 @@ from multilingual_clip import pt_multilingual_clip
 from pydantic import BaseModel, Field
 from transformers.tokenization_utils_base import TruncationStrategy
 from transformers.file_utils import PaddingStrategy
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from time import sleep
 
 from video_processing import extract_images
 
 logger = logging.getLogger(__name__)
-audio_classification_process: Process
+text_embeddings_process: Process
 video_embeddings_process: Process
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -64,22 +65,30 @@ def get_video_embeddings(url, image_model, preprocess):
 
 
 def get_text_embeddings(data, text_model, tokenizer):
+    print("trying process", data)
+    sys.stdout.flush()
     return text_model.forward(data, tokenizer).detach().tolist()
 
 
 # class Embeddings(BaseModel):
 #     values: list = Field(min_length=)
 
-def text_worker(queue: SimpleQueue):
+def text_worker(input_queue: Queue, output_queue: Queue):
     text_model, tokenizer = load_text_model()
     print("MClip text loaded")
     sys.stdout.flush()
-    while text := queue.get():
+    while text := input_queue.get():
         try:
-            queue.put(get_text_embeddings(text, text_model, tokenizer)[0])
+            print("txt", text)
+            sys.stdout.flush()
+            output_queue.put(get_text_embeddings(text, text_model, tokenizer)[0], timeout=30)
         except Exception as e:
+            print("txt", text)
+            print("txt", type(text))
+            print(e)
             logger.exception(e)
-            queue.put("Error while processing text embedding")
+            sys.stdout.flush()
+            # queue.put("Error while processing text embedding")
 
 
 def video_worker(queue: SimpleQueue):
@@ -95,14 +104,15 @@ def video_worker(queue: SimpleQueue):
 
 
 app = FastAPI()
-text_queue = SimpleQueue()
+text_queue = Queue()
+text_queue_output = Queue()
 video_queue = SimpleQueue()
 
 
 @app.on_event("startup")
 def startup():
-    global audio_classification_process, video_embeddings_process
-    text_embeddings_process = Process(target=text_worker, args=(text_queue,))
+    global text_embeddings_process, video_embeddings_process
+    text_embeddings_process = Process(target=text_worker, args=(text_queue, text_queue_output))
     video_embeddings_process = Process(target=video_worker, args=(video_queue,))
     text_embeddings_process.start()
     video_embeddings_process.start()
@@ -114,20 +124,24 @@ def shutdown_event():
     text_queue.put(None)
     video_queue.put(None)
     video_embeddings_process.terminate()
-    audio_classification_process.terminate()
+    text_embeddings_process.terminate()
 
 
 @app.post("/text_embeddings")
-def text_embeddings(text: str) -> EmbeddingResponse:
-    text_queue.put(text)
-    result = text_queue.get()
+def text_embeddings(text: str | None) -> EmbeddingResponse:
+    if text is None or len(text) < 1:
+        raise HTTPException(status_code=400)
+    text_queue.put(text, block=False)
+    sleep(0.1)
+    result = text_queue_output.get(timeout=40)
     if result != text:
         return EmbeddingResponse(result=result, is_success=True)
 
 
 @app.post("/video_embeddings")
-def video_embeddings(url: str) -> EmbeddingResponse:
+def video_embeddings(url: str):
     video_queue.put(url)
     result = video_queue.get()
     if result != url:
+        print("result", result)
         return EmbeddingResponse(result=result, is_success=True)

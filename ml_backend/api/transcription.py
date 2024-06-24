@@ -33,21 +33,23 @@ def transcribe(video_url: str, model: WhisperModel):
 
 
 def load_model():
-    return WhisperModel("small", cpu_threads=24)
+    return WhisperModel("small", cpu_threads=16)
 
 
 def model_worker(queue: SimpleQueue):
     model = load_model()
     print("Whisper loaded")
+    sys.stdout.flush()
     while url := queue.get():
         if url is None:
             print("Shutting down")
             break
         try:
             queue.put(transcribe(url, model))
-        except:
+        except Exception as e:
+            print(e)
+            sys.stdout.flush()
             queue.put(f"Error while processing {url}")
-
 
 transcription_queue = SimpleQueue()
 app = FastAPI()

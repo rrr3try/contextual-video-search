@@ -9,7 +9,6 @@ from fastapi import FastAPI
 
 import tensorflow as tf
 import tensorflow_hub as hub
-import numpy as np
 import csv
 
 from scipy.io import wavfile
@@ -44,7 +43,6 @@ def load_audio_model():
     return model, class_names
 
 
-# def extract_audio():
 def ensure_sample_rate(original_sample_rate, waveform,
                        desired_sample_rate=16000):
     """Resample waveform if required."""
@@ -73,8 +71,6 @@ def get_audio_classification(url, model, class_names):
     waveform = wav_data / tf.int16.max
     scores, embeddings, spectrogram = model(waveform)
     scores_np = scores.numpy()
-    spectrogram_np = spectrogram.numpy()
-    # infered_class =
     return class_names[scores_np.mean(axis=0).argmax()]
 
 
@@ -90,15 +86,10 @@ def audio_worker(queue: SimpleQueue):
             queue.put("Error while processing text embedding")
 
 
-#
-#
-#
 app = FastAPI()
 audio_queue = SimpleQueue()
 
 
-#
-#
 @app.on_event("startup")
 def startup():
     global audio_classification_process
@@ -106,8 +97,6 @@ def startup():
     audio_classification_process.start()
 
 
-#
-#
 @app.on_event("shutdown")
 def shutdown_event():
     logger.info("Shutting down process")
@@ -115,8 +104,6 @@ def shutdown_event():
     audio_classification_process.terminate()
 
 
-#
-#
 @app.post("/audio-classification")
 def audio_classification(url: str) -> AudioClassificationResponse:
     audio_queue.put(url)
@@ -124,5 +111,3 @@ def audio_classification(url: str) -> AudioClassificationResponse:
     if result != url:
         return AudioClassificationResponse(result=result, is_success=True)
 
-# if __name__ == '__main__':
-#     ...

@@ -48,20 +48,13 @@ services:
     command:
       [ "uvicorn", "audio-classification:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
 
-
-#  worker:
-#    build:
-#      context: ./api
-#      dockerfile: Dockerfile-worker
-#    command: "rq worker --url redis://redis:6379"
-#    volumes:
-#      - ./api:/app
-
-#  redis:
-#    image: redis:latest
-#    healthcheck:
-#      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-#      interval: 1s
-#      timeout: 3s
-#      retries: 5
-#    command: ["redis-server"]
+  spell-correction:
+    build:
+      context: ./api
+      dockerfile: Dockerfile-textcorrection
+    volumes:
+      - ./api:/app
+    ports:
+      - "8005:8000"
+    command:
+      [ "uvicorn", "audio-classification:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
