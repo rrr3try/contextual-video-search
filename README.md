@@ -27,16 +27,16 @@ Content-Type: application/json
   "maximumNumberOfMatchOptionsVisual": 50,
 
   "coefficientOfCoincidenceTag": 1,
-  "minimumPrefixLengthTag": 2,
+  "minimumPrefixLengthTag": 3,
   "maximumNumberOfMatchOptionsTag": 50,
 
-  "boostDescriptionUser": 1.0,
-  "boostTranscriptionAudio": 0.0,
-  "boostDescriptionVisual": 1.0,
+  "boostDescriptionUser": 2.0,
+  "boostTranscriptionAudio": 1.0,
+  "boostDescriptionVisual": 2.0,
   "boostTags": 1.0,
   "boostEmbeddingAudio": 2.0,
-  "boostEmbeddingVisual": 10.0,
-  "boostEmbeddingUserDescription": 4.0
+  "boostEmbeddingVisual": 1.0,
+  "boostEmbeddingUserDescription": 1.0
 }
 ```
 
