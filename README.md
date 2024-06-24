@@ -7,6 +7,8 @@ http://192.144.12.231:8080
 ## Search API
 Docs GET http://192.144.12.231:8080/swagger-ui/index.html
 
+GET http://192.144.12.231:8080/search?text=query
+
 POST http://192.144.12.231:8080/search/combine
 Content-Type: application/json
 
@@ -39,14 +41,11 @@ Content-Type: application/json
 ```
 
 
-
 ## Index API
 POST http://192.144.12.231:8080/index
 ```{
-  "url": "",
-  "title": "",
-  "description": "",
-  "tags": ""
+  "link": "",
+  "description": ""
 }
 ```
 
@@ -75,7 +74,7 @@ http://192.144.12.231:8004/docs#/
 Классифицирует звуковые события, что помогает в маркировке и анализе аудиофрагментов.
 Приоритизации информации для поиска
 
-### text_correction исправление очепяток
+### text_correction исправление опечаток
 http://192.144.12.231:8005/docs#/
 Порт: 8005
 
