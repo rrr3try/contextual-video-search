@@ -2,7 +2,6 @@ import logging
 from multiprocessing import Process, SimpleQueue, Queue
 import sys
 import torch
-import transformers
 from transformers import AutoModelForSeq2SeqLM, T5TokenizerFast
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException
